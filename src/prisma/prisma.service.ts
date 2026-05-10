@@ -36,6 +36,14 @@ export class PrismaService implements OnModuleInit {
     return this.prisma.cartItem;
   }
 
+  get order() {
+    return this.prisma.order;
+  }
+
+  get orderItem() {
+    return this.prisma.orderItem;
+  }
+
   async $connect() {
     return this.prisma.$connect();
   }
