@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
+import { APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -10,11 +11,18 @@ import { ConfigModule } from '@nestjs/config';
 import { OrderModule } from './order/order.module';
 
 @Module({
-  imports: [UsersModule,ProductsModule, AuthModule, CartModule,ConfigModule.forRoot({
-      isGlobal: true,
-    }), OrderModule,],
+  imports: [UsersModule, ProductsModule, AuthModule, CartModule, ConfigModule.forRoot({
+    isGlobal: true,
+  }), OrderModule,],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
-  exports : [PrismaService],
+  providers: [
+    AppService,
+    PrismaService,
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
+    },
+  ],
+  exports: [PrismaService],
 })
-export class AppModule {}
+export class AppModule { }

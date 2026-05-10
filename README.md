@@ -1,18 +1,21 @@
 # E-commerce System
 
-A modern, scalable e-commerce backend built with NestJS, TypeScript, and PostgreSQL. This project provides a robust foundation for building online stores with user authentication, product management, and secure API endpoints.
+A modern, scalable e-commerce backend built with NestJS, TypeScript, and PostgreSQL. This project provides a robust foundation for building online stores with user authentication, product management, shopping cart, and comprehensive order management.
 
-## 🚀 Features
+## Features
 
 - **User Authentication**: Secure JWT-based authentication system with password hashing
 - **Product Management**: Full CRUD operations for products with stock tracking
+- **Shopping Cart**: Cart management with add/remove/update functionality
+- **Order Management**: Complete order lifecycle with status tracking
+- **Order Status System**: Comprehensive order status management with validation
 - **Database Integration**: PostgreSQL with Prisma ORM for type-safe database operations
 - **RESTful API**: Well-structured REST API following best practices
 - **TypeScript**: Full TypeScript support for type safety and better development experience
 - **Testing**: Comprehensive unit and e2e testing setup
 - **Code Quality**: ESLint and Prettier for consistent code formatting
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend Framework**: NestJS
 - **Language**: TypeScript
@@ -24,13 +27,13 @@ A modern, scalable e-commerce backend built with NestJS, TypeScript, and Postgre
 - **Code Linting**: ESLint
 - **Code Formatting**: Prettier
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Node.js (v18 or higher)
 - PostgreSQL (v12 or higher)
 - npm or yarn
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the Repository
 
@@ -75,7 +78,7 @@ npx prisma generate
 npx prisma db push
 ```
 
-## 🏃‍♂️ Running the Application
+## Running the Application
 
 ### Development Mode
 
@@ -95,7 +98,7 @@ npm run build
 npm run start:prod
 ```
 
-## 📊 Database Schema
+## Database Schema
 
 The application uses the following main entities:
 
@@ -122,7 +125,69 @@ interface Product {
 }
 ```
 
-## 🔌 API Endpoints
+### Cart
+```typescript
+interface Cart {
+  id: number
+  userId: number (unique)
+  createdAt: DateTime
+  items: CartItem[]
+}
+```
+
+### CartItem
+```typescript
+interface CartItem {
+  id: number
+  cartId: number
+  productId: number
+  quantity: number
+  product: Product
+}
+```
+
+### Orders
+```typescript
+interface Order {
+  id: number
+  userId: number
+  total: number
+  status: OrderStatus
+  createdAt: DateTime
+  updatedAt: DateTime
+  shippedAt?: DateTime
+  deliveredAt?: DateTime
+  items: OrderItem[]
+}
+```
+
+### OrderItem
+```typescript
+interface OrderItem {
+  id: number
+  orderId: number
+  productId: number
+  quantity: number
+  price: number
+  order: Order
+  product: Product
+}
+```
+
+### OrderStatus
+```typescript
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+```
+
+## API Endpoints
 
 ### Authentication
 
@@ -150,7 +215,29 @@ interface Product {
 | PUT | `/products/:id` | Update product information |
 | DELETE | `/products/:id` | Delete product |
 
-## 🧪 Testing
+### Cart
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/cart` | Get user's cart |
+| POST | `/cart/add` | Add item to cart |
+| PUT | `/cart/update` | Update cart item quantity |
+| DELETE | `/cart/remove/:productId` | Remove item from cart |
+| DELETE | `/cart/clear` | Clear entire cart |
+
+### Orders
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/order/checkout` | Create order from cart |
+| GET | `/order/my-orders` | Get current user's orders |
+| GET | `/order/:id` | Get specific order details |
+| PUT | `/order/:id/status` | Update order status |
+| PUT | `/order/:id/cancel` | Cancel order |
+| GET | `/order` | Get all orders (admin) |
+| GET | `/order/status/:status` | Get orders by status |
+
+## Testing
 
 ### Unit Tests
 
@@ -170,7 +257,7 @@ npm run test:e2e
 npm run test:cov
 ```
 
-## 📝 Project Structure
+## Project Structure
 
 ```
 src/
@@ -179,6 +266,18 @@ src/
 │   ├── auth.module.ts       # Auth module configuration
 │   ├── auth.service.ts     # Auth business logic
 │   └── jwt.strategy.ts     # JWT strategy implementation
+├── cart/                    # Shopping cart module
+│   ├── cart.controller.ts   # Cart endpoints
+│   ├── cart.module.ts       # Cart module configuration
+│   └── cart.service.ts     # Cart business logic
+├── order/                   # Order management module
+│   ├── order.controller.ts  # Order endpoints
+│   ├── order.module.ts      # Order module configuration
+│   ├── order.service.ts     # Order business logic
+│   ├── dto/                 # Data transfer objects
+│   │   └── update-order-status.dto.ts
+│   └── types/               # Type definitions
+│       └── order-status.enum.ts
 ├── products/               # Products module
 │   ├── products.controller.ts
 │   ├── products.module.ts
@@ -189,13 +288,15 @@ src/
 │   └── users.service.ts
 ├── prisma/                  # Prisma database service
 │   └── prisma.service.ts
+├── docs/                    # Documentation
+│   └── order-status-system.md
 ├── app.controller.ts        # Main application controller
 ├── app.module.ts           # Main application module
 ├── app.service.ts          # Main application service
 └── main.ts                 # Application entry point
 ```
 
-## 🔧 Development Scripts
+## Development Scripts
 
 | Command | Description |
 |---------|-------------|
@@ -209,7 +310,7 @@ src/
 | `npm run test:e2e` | Run end-to-end tests |
 | `npm run test:cov` | Run tests with coverage report |
 
-## 🛡️ Security Features
+## Security Features
 
 - **Password Hashing**: All passwords are hashed using bcrypt
 - **JWT Authentication**: Secure token-based authentication
@@ -217,14 +318,14 @@ src/
 - **CORS**: Cross-Origin Resource Sharing configured
 - **Environment Variables**: Sensitive data stored in environment variables
 
-## 📈 Performance Considerations
+## Performance Considerations
 
 - **Database Indexing**: Optimized database queries with proper indexing
 - **Connection Pooling**: Efficient database connection management
 - **Caching**: Ready for Redis integration
 - **Lazy Loading**: Modules loaded on demand
 
-## 🚀 Deployment
+## Deployment
 
 ### Environment Variables for Production
 
@@ -253,7 +354,7 @@ EXPOSE 3000
 CMD ["npm", "run", "start:prod"]
 ```
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -261,30 +362,30 @@ CMD ["npm", "run", "start:prod"]
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the UNLICENSED license.
 
-## 🆘 Support
+## Support
 
 For support and questions, please open an issue in the repository.
 
-## 🔮 Future Enhancements
+## Future Enhancements
 
 - [ ] Product categories and tags
-- [ ] Shopping cart functionality
-- [ ] Order management system
 - [ ] Payment integration (Stripe, PayPal)
 - [ ] Admin dashboard
 - [ ] Product reviews and ratings
-- [ ] Inventory management
-- [ ] Email notifications
+- [ ] Advanced inventory management
+- [ ] Email notifications for order status changes
 - [ ] Redis caching
 - [ ] API rate limiting
 - [ ] File upload for product images
-- [ ] Search functionality
+- [ ] Advanced search functionality
 - [ ] Multi-language support
+- [ ] Order analytics and reporting
+- [ ] Real-time order tracking
 
 ---
 
-Built with ❤️ using [NestJS](https://nestjs.com/)
+Built with [NestJS](https://nestjs.com/)
