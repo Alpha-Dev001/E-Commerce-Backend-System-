@@ -4,29 +4,33 @@ import {
   Body,
   Get,
   Param,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 
 import { CartService } from './cart.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('cart')
+@UseGuards(JwtAuthGuard)
 export class CartController {
   constructor(
     private cartService: CartService,
-  ) {}
+  ) { }
 
   @Post()
-  addToCart(@Body() body: any) {
+  addToCart(@Body() body: any, @Request() req: any) {
     return this.cartService.addToCart(
-      body.userId,
+      req.user.userId,
       body.productId,
       body.quantity,
     );
   }
 
-  @Get(':userId')
-  getCart(@Param('userId') userId: string) {
+  @Get()
+  getCart(@Request() req: any) {
     return this.cartService.getCart(
-      Number(userId),
+      req.user.userId,
     );
   }
 }
